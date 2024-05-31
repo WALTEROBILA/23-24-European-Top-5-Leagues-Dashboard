@@ -188,43 +188,27 @@ with three:
 
 ### Radar Chart
 
-player_1 = st.selectbox("Select player:",dat["Player"].unique())
-player_2 = st.selectbox("Select Player:", dat["Player"].unique())
+template = st.radio("Select a template:",["Attacking Template","Possession Template","Defensive Template"])
 
-rdat = dat[(dat["Player"]==player_1) | (dat["Player"]==player_2)]
+p1, p3,p2 = st.columns(3)
+with p1:
+    player_1 = st.selectbox("Select player:",dat["Player"].unique(), index = 55)
+with p2:
+    player_2 = st.selectbox("Select Player:",dat["Player"].unique(), index = 70)
 
-radat = rdat[["Player","Goals Scored","Assists","Dribbles Attempted","Dribble Success %","Key Passes","Crosses into the Penalty Area",
+
+if template == "Attacking Template":
+    rdat = dat1[["Player","Squad","Goals Scored","Assists","Dribbles Attempted","Dribble Success %","Key Passes","Crosses into the Penalty Area",
             "Passes into the Penalty Area","Expected Goals","Expected Assists","Assists Overperformance"]]
-params = list(radat.columns)
-params = params[1:]
-
-ranges =  []
-for x in params:
-    a = min(radat[params][x])
-    a = a - (a*0.25)
-
-    b = max(radat[params][x])
-    b = b + (b*0.25)
-
-    ranges.append((a,b))
-
-a_values = radat[radat["Player"]==player_1].iloc[0].values[1:].tolist()
-b_values = radat[radat["Player"]==player_2].iloc[0].values[1:].tolist()
-
-values = [a_values, b_values]
-
-print(values)
+elif template == "Possession Template":
+    rdat = dat1[["Player","Squad","Pass Completion %","Progressive Passes","Carries","Progressive Carries","Progressive Carrying Distance",
+                "Progressive Passing Distance","Through Balls","Touches","Progressive Passes Received","Key Passes",]]
+elif template == "Defensive Template":
+    rdat = dat1[["Player","Squad","Recoveries","Tackles","Tackles Won","Tackle Success Rate","Interceptions","Clearances","Errors Leading to a Shot",
+                "Fouls","Aerial Duel Success Rate"]]
 
 
-
-radar = Radar()
-
-fig,ax = radar.plot_radar(ranges=ranges, params=params, values=values, radar_color=['red','blue'])
-
-st.pyplot(fig)
-
-
-
+functions.comparison_radar(rdat=rdat, player_1=player_1, player_2=player_2)
 
 
 

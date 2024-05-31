@@ -1,4 +1,8 @@
 import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
+import soccerplots
+from soccerplots.radar_chart import Radar
 
 
 
@@ -63,7 +67,7 @@ def merge_leagues(pl,li):
     return data
 
 def scatter_variables(data):    # Variables to appear on the x,y scatterplot
-    dat = data[["Player","Goals Scored","Assists","Goals + Assists", "Non-Penalty Goals","Penalties Scored","Penalties Attempted",
+    dat = data[["Player","Squad","Goals Scored","Assists","Goals + Assists", "Non-Penalty Goals","Penalties Scored","Penalties Attempted",
                "Yellow Cards", "Red Cards","Expected Goals","Non-Penalty Expected Goals","Expected Assists",
                "Progressive Carries","Progressive Passes","Progressive Passes Received_x","Touches","Touches in the Defensive Penalty Area",
                "Defensive 1/3 Touches","Middle 1/3 Touches","Touches in the Attacking Third","Attacking Penalty Area Touches",
@@ -87,11 +91,62 @@ def scatter_variables(data):    # Variables to appear on the x,y scatterplot
     return dat
     
     
+def comparison_radar(rdat,player_1,player_2):
+    """
+    Plots a radar chart comparing two players.
+
+    Args:
+        rdat = Dataframe containing the variables to be plotted. Must include "Player" and "Squad".\n  
+        player_1 = Player on the chart. Selected from the selectbox provided.\n  
+        player_2 = Player on the chart. Selected from the selecttbox provided.  
+
+    Returns:
+        Comparative radar chart displaying two players' characteristics, as well as their names and the club they play for.
+
+    """
+    params = list(rdat.columns)
+    params = params[2:]
+
+    ranges =  []
+    for x in params:
+        a = min(rdat[params][x])
+        a = a - (a*0.25)
+
+        b = max(rdat[params][x])
+        b = b + (b*0.25)
+        ranges.append((a,b))
+
+    a_values = rdat[rdat["Player"]==player_1].iloc[0].values[2:].tolist()
+    b_values = rdat[rdat["Player"]==player_2].iloc[0].values[2:].tolist()
+    values = [a_values, b_values]
+    a_team = rdat[rdat["Player"]==player_1]["Squad"].values[0]
+    b_team = rdat[rdat["Player"]==player_2]["Squad"].values[0]
+    print(a_team)
+    print(b_team)
+
+    title = dict(
+        title_name = player_1,
+        title_color="red",
+        subtitle_name =a_team,
+        subtitle_color = "red",
+        title_name_2=player_2,
+        title_color_2="blue",
+        subtitle_name_2=b_team,
+        subtitle_color_2 = "blue",
+        title_fontsize = 18,
+        subtitle_fontsize=15
+    )
+
+    endnote = "Data Courtesy of FBref. All stats are presented per 90 minutes played."
+
+    radar = Radar()
+
+    fig,ax = radar.plot_radar(ranges=ranges, params=params, values=values, radar_color=['red','blue'],title=title, endnote = endnote,compare=True)
+
+    st.pyplot(fig)
 
 
 
 
-#file = "pl.xlsx"
-#pl.to_excel(file, index=False)
 
 
