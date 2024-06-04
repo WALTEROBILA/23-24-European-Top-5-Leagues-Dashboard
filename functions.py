@@ -49,7 +49,7 @@ def clean_pass(pas):
         Cleaned Passing data.
     """
     pas.rename(columns={"KP":"Key Passes","CrsPA":"Crosses into the Penalty Area","PPA":"Passes into the Penalty Area",
-                        "A-xAG":"Assists Overperformance","Att":"Passes Attempted",
+                        "A-xAG":"xA Overperformance","Att":"Passes Attempted",
                         "Cmp%":"Pass Completion %"},inplace=True)
     pas.drop(columns=["Pos","Age","Born","90s","Nation","Matches"], inplace=True)
     return pas
@@ -127,17 +127,17 @@ def merge_stats(league, std, poss, pas, ptype, misc, defe):
     return data
 
 
-def merge_leagues(pl,li):
+def merge_leagues(pl,li,ll,sa):
     """
     Merges dataframes from different leagues.\n
 
     Args:
-        pl,li,ll,sa,bl = Premier League, Liggue 1, La Liga, Serie A, Bundesliga dataframes.\n
+        pl,li,ll,sa = Premier League, Liggue 1, La Liga, Serie A dataframes.\n
 
     Returns:
         A unified dataframe with all leagues.
     """
-    data = pd.concat([pl,li], axis=0)
+    data = pd.concat([pl,li,ll,sa], axis=0)
     print(data["League"].unique())
     return data
 
@@ -157,7 +157,7 @@ def scatter_variables(data):    # Variables to appear on the x,y scatterplot
                "Defensive 1/3 Touches","Middle 1/3 Touches","Touches in the Attacking Third","Attacking Penalty Area Touches",
                "Dribbles Attempted","Dribble Success %","Carries", "Total Carry Distance","PrgDist_x","PrgC","Carries into the Penalty Area",
                 "Passes Received","Passes Attempted","Pass Completion %","TotDist",
-                "PrgDist_y","Cmp.1","Att.1","Cmp%.1","Cmp.2","Att.2","Cmp%.2","Cmp.3","Att.3","Cmp%.3","Assists Overperformance",
+                "PrgDist_y","Cmp.1","Att.1","Cmp%.1","Cmp.2","Att.2","Cmp%.2","Cmp.3","Att.3","Cmp%.3","xA Overperformance",
                 "Key Passes","Passes into the Penalty Area","Crosses into the Penalty Area","Live_y","Dead","TB",
                 "Switches","Crs_x","CK","Fouls","Fouls Drawn","Penalty Kicks Won","PKcon","Recoveries","Won",
                 "Aerial Duel Success Rate","Tackles","TklW_y","Def 3rd","Mid 3rd","Att 3rd","Int_y","Tkl+Int","Clr","Err","Tackle Success Rate","League"]]
@@ -228,6 +228,113 @@ def comparison_radar(rdat,player_1,player_2):
     fig,ax = radar.plot_radar(ranges=ranges, params=params, values=values, radar_color=['red','blue'],title=title, endnote = endnote,compare=True)
 
     st.pyplot(fig)
+
+
+### Percentiles Radar
+
+def get_percentiles(df, columns):
+    """
+    Ranks players' various variables by percentile.\n
+
+    Args:
+        data - The data whose variables we want to convert innto percentiles.
+        columns - The column names of the data
+
+    Returns: 
+        Data in percentile form.
+    """
+    percentile_df = df.copy()
+    for column in columns:
+        if column not in ['Player', 'Squad', 'League']:  # Skip non-numeric columns
+            percentile_df[column ] = df[column].rank(pct=True) * 100
+    print(percentile_df.columns)
+    return percentile_df
+
+    
+
+    
+def percentile_comparison_radar(rdat,player_1,player_2):
+    """
+    Plots a radar chart comparing two players, in terms of their percentile ranks.
+
+    Args:
+        rdat = Dataframe containing the variables to be plotted(In percentiles). Must include "Player" and "Squad".\n  
+        player_1 = Player on the chart. Selected from the selectbox provided.\n  
+        player_2 = Player on the chart. Selected from the selecttbox provided.  
+
+    Returns:
+        Comparative radar chart displaying two players' characteristics, as well as their names and the club they play for.
+
+    """
+    params = list(rdat.columns)
+    params = params[2:]
+
+    ranges =  []
+    for x in params:
+        a = 0
+        a = 0
+
+        b = 100
+        b = 100
+        ranges.append((a,b))
+
+    a_values = rdat[rdat["Player"]==player_1].iloc[0].values[2:].tolist()
+    b_values = rdat[rdat["Player"]==player_2].iloc[0].values[2:].tolist()
+    values = [a_values, b_values]
+    a_team = rdat[rdat["Player"]==player_1]["Squad"].values[0]
+    b_team = rdat[rdat["Player"]==player_2]["Squad"].values[0]
+    print(a_team)
+    print(b_team)
+
+    title = dict(
+        title_name = player_1,
+        title_color="red",
+        subtitle_name =a_team,
+        subtitle_color = "red",
+        title_name_2=player_2,
+        title_color_2="blue",
+        subtitle_name_2=b_team,
+        subtitle_color_2 = "blue",
+        title_fontsize = 18,
+        subtitle_fontsize=15
+    )
+
+    endnote = "Data Courtesy of FBref. All stats are presented per 90 minutes played."
+
+    radar = Radar()
+
+    fig,ax = radar.plot_radar(ranges=ranges, params=params, values=values, radar_color=['red','blue'],title=title, endnote = endnote,compare=True)
+
+    st.pyplot(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
