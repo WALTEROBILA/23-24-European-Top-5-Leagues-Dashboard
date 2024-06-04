@@ -3,7 +3,7 @@ matplotlib
 altair
 plotly
 numpy
-strreamlit
-plotly.graph_objects
+streamlit
+plotly
 altair
 soccerplots
