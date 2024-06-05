@@ -8,3 +8,4 @@ plotly
 altair
 soccerplots
 streamlit_option_menu
+openpyxl
